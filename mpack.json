@@ -1,0 +1,62 @@
+{
+  "type" : "full-release",
+  "name" : "hdf-ambari-mpack",
+  "version": "3.0.3.0-6",
+  "hash": "ef868745e519a678a1574b0dedc00ce00daa068f",
+  "branch": "UNKNOWN",
+  "description" : "HDF Ambari Management Pack",
+  "prerequisites": {
+    "min-ambari-version" : "2.5.1.0",
+    "max-ambari-version" : ""
+  },
+  "artifacts": [
+    {
+      "name" : "hdf-service-definitions",
+      "type" : "service-definitions",
+      "source_dir": "common-services"
+    },
+    {
+      "name" : "hdf-stack-definitions",
+      "type" : "stack-definitions",
+      "source_dir": "stacks"
+    },
+    {
+      "name" : "hdp-addon-services",
+      "type" : "stack-addon-service-definitions",
+      "source_dir": "hdp-addon-services",
+      "service_versions_map": [
+        {
+          "service_name" : "NIFI",
+          "service_version" : "1.2.0",
+          "applicable_stacks" : [
+            {
+              "stack_name" : "HDP",
+              "stack_version" : "2.6"
+            }
+          ]
+        },
+        {
+          "service_name" : "REGISTRY",
+          "service_version" : "0.3.0",
+          "applicable_stacks" : [
+            {
+              "stack_name" : "HDP",
+              "stack_version" : "2.6"
+            }
+          ]
+        },
+        {
+          "service_name" : "STREAMLINE",
+          "service_version" : "0.5.0",
+          "applicable_stacks" : [
+            {
+              "stack_name" : "HDP",
+              "stack_version" : "2.6"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,90 @@
+<upgrade-config-changes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="upgrade-config.xsd">
+    <services>
+        <service name="NIFI">
+            <component name="NIFI_MASTER">
+                <changes>
+
+                    <!-- Update these configs in nifi-properties. -->
+                    <definition xsi:type="configure" id="hdf_2_0_0_0_update_nifi_properties_configs">
+                        <type>nifi-properties</type>
+                        <set key="nifi.version" value="1.0.0.{{stack_version_buildnum}}"/>
+                    </definition>
+
+                    <definition xsi:type="configure" id="hdf_2_1_0_0_update_nifi_properties_configs">
+                        <type>nifi-properties</type>
+                        <set key="nifi.version" value="1.1.0.{{stack_version_buildnum}}"/>
+                    </definition>
+
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_nifi_properties_configs">
+                        <type>nifi-properties</type>
+                        <set key="nifi.version" value="1.2.0.{{stack_version_buildnum}}"/>
+                    </definition>
+
+                    <!-- Add these configs to nifi-properties. -->
+                    <definition xsi:type="configure" id="hdf_2_1_0_0_add_nifi_properties_configs">
+                        <type>nifi-properties</type>
+                        <set key="nifi.sensitive.props.additional.keys" value=""/>
+                        <set key="nifi.variable.registry.properties" value=""/>
+                    </definition>
+                    <!-- Add these configs to nifi-ambari-config. -->
+                    <definition xsi:type="configure" id="hdf_2_1_0_0_add_nifi_ambari_config_configs">
+                        <type>nifi-ambari-config</type>
+                        <set key="nifi.security.encrypt.configuration.password" value=""/>
+                    </definition>
+
+                    <!-- Update login identity providers -->
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_login_identity_providers_configs">
+                        <type>nifi-login-identity-providers-env</type>
+                        <replace key="content" find="&lt;class&gt;org.apache.nifi.ldap.LdapProvider&lt;/class&gt;" replace-with="&lt;class&gt;org.apache.nifi.ldap.LdapProvider&lt;/class&gt;&lt;property name=&quot;Identity Strategy&quot;&gt;USE_DN&lt;/property&gt;"/>
+                    </definition>
+
+                    <!-- Update node logback configuration -->
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_nifi_node_logback_configs">
+                        <type>nifi-node-logback-env</type>
+                        <replace key="content" find="&lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&quot;&gt;" replace-with="&lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy&quot;&gt;"/>
+                        <replace key="content" find="&lt;timeBasedFileNamingAndTriggeringPolicy class=&quot;ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP&quot;&gt;" replace-with=""/>
+                        <replace key="content" find="&lt;/timeBasedFileNamingAndTriggeringPolicy&gt;" replace-with=""/>
+                        <regex-replace key="content" find="&lt;immediateFlush&gt;(\w+)&lt;/immediateFlush&gt;" replace-with=""/>
+                        <replace key="content" find="&lt;encoder class=&quot;ch.qos.logback.classic.encoder.PatternLayoutEncoder&quot;&gt;" replace-with="&lt;immediateFlush&gt;true&lt;/immediateFlush&gt;&lt;encoder class=&quot;ch.qos.logback.classic.encoder.PatternLayoutEncoder&quot;&gt;"/>
+                        <replace key="content" find="&lt;/configuration&gt;" replace-with="&lt;logger name=&quot;org.apache.calcite.runtime.CalciteException&quot; level=&quot;OFF&quot;/&gt;&lt;/configuration&gt;"/>
+                    </definition>
+
+                    <!-- Update bootstrap config -->
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_nifi_bootstrap_env_configs">
+                        <type>nifi-bootstrap-env</type>
+                        <insert key="content" value="{% if security_enabled %}" insert-type="append" newline-before="true" newline-after="true"/>
+                        <insert key="content" value="java.arg.0=-Djava.security.auth.login.config={{nifi_jaas_conf}}" insert-type="append" newline-after="true"/>
+                        <insert key="content" value="{% endif %}" insert-type="append" newline-after="true"/>
+                        <insert key="content" value="java.arg.9999=-Djava.security.egd=file:/dev/urandom" insert-type="append" newline-after="true"/>
+                    </definition>
+
+                    <!-- Update state management -->
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_nifi_state_management_env_configs">
+                    <type>nifi-state-management-env</type>
+                        <replace key="content" find="&lt;class&gt;org.apache.nifi.controller.state.providers.local.WriteAheadLocalStateProvider&lt;/class&gt;&#xA;        &lt;property name=&quot;Directory&quot;&gt;{{nifi_state_dir}}&lt;/property&gt;"
+                                 replace-with="&lt;class&gt;org.apache.nifi.controller.state.providers.local.WriteAheadLocalStateProvider&lt;/class&gt;&#xA;
+                                       &lt;property name=&quot;Directory&quot;&gt;{{nifi_state_dir}}&lt;/property&gt;&#xA;
+                                       &lt;property name=&quot;Always Sync&quot;&gt;false&lt;/property&gt;&#xA;
+                                       &lt;property name=&quot;Partitions&quot;&gt;16&lt;/property&gt;&#xA;
+                                       &lt;property name=&quot;Checkpoint Interval&quot;&gt;2 mins&lt;/property&gt;&#xA;            "/>
+                    </definition>
+
+                    <!-- Update bootstrap notification services -->
+                    <definition xsi:type="configure" id="hdf_3_0_0_0_update_nifi_bootstrap_notification_services_env_configs">
+                        <type>nifi-bootstrap-notification-services-env</type>
+                        <replace key="content" find="&lt;/services&gt;" replace-with="&#xA;
+                        &lt;!--&#xA;
+                        &lt;service&gt;&#xA;
+                        &lt;id&gt;http-notification&lt;/id&gt;&#xA;
+                        &lt;class&gt;org.apache.nifi.bootstrap.notification.http.HttpNotificationService&lt;/class&gt;&#xA;
+                        &lt;property name=&quot;URL&quot;&gt;&lt;/property&gt;&#xA;
+                        &lt;/service&gt;&#xA;
+                        --&gt;&#xA;
+                        &lt;/services&gt;"/>
+                    </definition>
+
+                </changes>
+            </component>
+        </service>
+    </services>
+</upgrade-config-changes>
