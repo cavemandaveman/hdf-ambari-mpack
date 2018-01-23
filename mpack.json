@@ -1,7 +1,7 @@
 {
   "type" : "full-release",
   "name" : "hdf-ambari-mpack",
-  "version": "3.0.3.0-6",
+  "version": "3.0.3.0-6-nifi",
   "hash": "ef868745e519a678a1574b0dedc00ce00daa068f",
   "branch": "UNKNOWN",
   "description" : "HDF Ambari Management Pack",
